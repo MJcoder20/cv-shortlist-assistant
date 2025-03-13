@@ -1,0 +1,16 @@
+streamlit
+pandas 
+pdfplumber
+python-docx
+llama-index
+docx
+requests
+nomic
+transformers
+torch 
+nomic
+scikit-learn
+reportlab
+einops
+numpy
+sklearn
