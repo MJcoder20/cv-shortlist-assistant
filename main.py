@@ -4,7 +4,6 @@ from evaluation.similarity import calculate_similarity, filter_by_threshold
 from processing.fileProcessing import (
     extract_text_from_pdf,
     extract_text_from_docx,
-    extract_text_from_csv,
 )
 from services.ollama import (
     RESUME_PROMPT,
@@ -24,7 +23,7 @@ def main():
     # Files uploader
     job_text = sl.text_input("Job Description")
     resume_files = sl.file_uploader(
-        "Upload Resumes", type=["pdf", "docx", "txt", "csv"], accept_multiple_files=True
+        "Upload Resumes", type=["pdf", "docx"], accept_multiple_files=True
     )
 
     # User-defined criteria
@@ -55,10 +54,6 @@ def main():
                         resume_texts.append(extract_text_from_pdf(f))
                     elif f.name.endswith(".docx"):
                         resume_texts.append(extract_text_from_docx(f))
-                    elif f.name.endswith(".csv"):
-                        resume_texts.append(extract_text_from_csv(f))
-                    elif f.name.endswith(".txt"):
-                        resume_texts.append(f.read().decode("utf-8"))
                     else:
                         sl.error(f"Unsupported resume file format: {f.name}")
                         return

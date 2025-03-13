@@ -1,12 +1,5 @@
 import docx
 import pdfplumber
-import pandas as pd
-
-
-# Function to extract text from CSV
-def extract_text_from_csv(csv_file):
-    df = pd.read_csv(csv_file, converters={"resume_text": lambda x: x.strip()})
-    return " ".join(df["resume_text"].tolist())  # Combine all text into a single string
 
 
 # Function to extract text from PDF

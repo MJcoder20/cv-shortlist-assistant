@@ -2,7 +2,7 @@ import requests
 
 # OpenRouter API configuration
 API_URL = "https://openrouter.ai/api/v1/chat/completions"
-API_KEY = "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"
+API_KEY = "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"
 headers = {"Authorization": f"Bearer {API_KEY}", "Content-Type": "application/json"}
 
 # "model": "meta-llama/llama-3.1-8b-instruct:free",  # no
@@ -17,6 +17,7 @@ model = "mistralai/mistral-7b-instruct:free"
 RESUME_PROMPT = """
     Extract the skills, experience, and qualifications from the following Resume text with the output is precise and abbreviated.
                 Format the output as:
+                - Email Address: [email address of the applicant]
                 - Technical Skills: [list of technical skills] 
                 - Soft Skills: [list of soft skills]
                 - Experience: [list of experience requirements]
@@ -50,8 +51,9 @@ RESUME_PROMPT3 = """
             - Analyze each resumes strengths and weaknesses considering the job description{job_text}.
             - Conclude the best resume based on the previous data 
             and output it in the format: 
-                - Best Resume: [Name of resume]
-                - [why this was concluded as best resume]
+            - Best Resume: [Name of resume]
+            - [why this was concluded as best resume]
+            - Contact: [email address]
             
             Format the output as shown for each resume:
             - Strengths: [list of strengths]
