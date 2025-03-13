@@ -1,6 +1,6 @@
 import streamlit as sl
 
-from embeddings.similarity import calculate_similarity, filter_by_threshold
+from evaluation.similarity import calculate_similarity, filter_by_threshold
 from processing.fileProcessing import (
     extract_text_from_pdf,
     extract_text_from_docx,
