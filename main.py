@@ -67,7 +67,7 @@ def main():
                 job_embedding = embedder.generate(job_text)
                 resume_embeddings = [embedder.generate(text) for text in resume_texts]
                 similarities = calculate_similarity(job_embedding, resume_embeddings)
-                indices = filter_by_threshold(similarities, 0.50)
+                indices = filter_by_threshold(similarities, 0.545)
 
                 resume_features = [
                     make_request(extract_info(

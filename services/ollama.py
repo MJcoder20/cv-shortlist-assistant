@@ -1,9 +1,8 @@
 import requests
+from config import API_URL, OPENROUTER_API_KEY
 
 # OpenRouter API configuration
-API_URL = "https://openrouter.ai/api/v1/chat/completions"
-API_KEY = "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"
-headers = {"Authorization": f"Bearer {API_KEY}", "Content-Type": "application/json"}
+headers = {"Authorization": f"Bearer {OPENROUTER_API_KEY}", "Content-Type": "application/json"}
 
 # "model": "meta-llama/llama-3.1-8b-instruct:free",  # no
 # "model": "meta-llama/llama-3.2-1b-instruct:free",   # yes
@@ -47,17 +46,18 @@ RESUME_PROMPT2 = """
 
 RESUME_PROMPT3 = """
             Execute the following based on the text of the resume shortlist provided below: 
-            - Analyze each resumes general strengths and weaknesses.
+            - Analyze each resumes general strengths and weaknesses regardless of the job description.
             - Analyze each resumes strengths and weaknesses considering the job description{job_text}.
-            - Conclude the best resume based on the previous data 
+            
+            Format the output as shown for each applicant's resume:
+            - Strengths: [list of strengths]
+            - Weaknesses: [list of weaknesses]
+            
+            Then Conclude the best resume based on the previous data 
             and output it in the format: 
             - Best Resume: [Name of resume]
             - [why this was concluded as best resume]
-            - Contact: [email address]
-            
-            Format the output as shown for each resume:
-            - Strengths: [list of strengths]
-            - Weaknesses: [list of weaknesses]
+            - Contact: [email address of the applicant]
                 
             Text:
             {prev_data}
@@ -66,7 +66,6 @@ RESUME_PROMPT3 = """
 
 def make_request(prompt):
     try:
-
         payload = {
             "model": model,  # model name as shown in openrouter website
             "messages": [
@@ -88,6 +87,7 @@ def make_request(prompt):
         return (
             result["choices"][0]["message"]["content"] if "choices" in result else None
         )
+
     except Exception as e:
         print(f"Error: {e}")
         return f"{e}"
