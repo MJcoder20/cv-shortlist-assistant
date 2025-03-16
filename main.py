@@ -1,5 +1,6 @@
 import streamlit as sl
 
+from Resume import Resume
 from evaluation.similarity import calculate_similarity, filter_by_threshold
 from processing.fileProcessing import (
     extract_text_from_pdf,
@@ -18,6 +19,11 @@ from embeddings.embeddingGen import EmbeddingGenerator
 
 
 def main():
+
+    with sl.sidebar:
+        openrouter_api_key = sl.text_input("OpenRouter API Key", key="api_key", type="password")
+        "[Get an OpenRouter API key](https://openrouter.ai/settings/keys)"
+
     sl.title(":memo: Resume Matcher")
 
     # Files uploader
@@ -36,78 +42,88 @@ def main():
     )
     education_level = sl.selectbox("Required Education Level", ["Bachelor's Degree", "Master's Degree",
                                                                 "PHD Degree", "None"])
-
-    # Submit button
-    if sl.button("Submit"):
-        if job_text and resume_files:
-            try:
-                # Validate job text
-                if not job_text.strip():
-                    sl.error("The job description file is empty.")
-                    return
-
-                # Extract text from resumes
-                sl.write("Extracting text from resumes...")
-                resume_texts = []
-                for f in resume_files:
-                    if f.name.endswith(".pdf"):
-                        resume_texts.append(extract_text_from_pdf(f))
-                    elif f.name.endswith(".docx"):
-                        resume_texts.append(extract_text_from_docx(f))
-                    else:
-                        sl.error(f"Unsupported resume file format: {f.name}")
+    if openrouter_api_key:
+        # Submit button
+        if sl.button("Submit"):
+            if job_text and resume_files:
+                try:
+                    # Validate job text
+                    if not job_text.strip():
+                        sl.error("The job description file is empty.")
                         return
 
-                # Validate resume texts
-                if not any(resume_texts):
-                    sl.error("No valid resume texts found.")
-                    return
+                    # Extract text from resumes
+                    sl.write("Extracting text from resumes...")
+                    resumes = []
+                    for f in resume_files:
+                        if f.name.endswith(".pdf"):
+                            text = extract_text_from_pdf(f)
+                        elif f.name.endswith(".docx"):
+                            text = extract_text_from_docx(f)
+                        else:
+                            sl.error(f"Unsupported resume file format: {f.name}")
+                            return
+                        if not text:
+                            sl.error("No valid resume texts found.")
+                            return
+                        else:
+                            resumes.append(Resume(text))
 
-                embedder = EmbeddingGenerator()
-                job_embedding = embedder.generate(job_text)
-                resume_embeddings = [embedder.generate(text) for text in resume_texts]
-                similarities = calculate_similarity(job_embedding, resume_embeddings)
-                indices = filter_by_threshold(similarities, 0.545)
+                    # Generating Embedding for the job description and resumes
+                    embedder = EmbeddingGenerator()
+                    job_embedding = embedder.generate(job_text)
+                    for i, resume in enumerate(resumes):
+                        emb = embedder.generate(resume.text)
+                        resume.embedding = emb
+                        # Generating cosine similarity of each resume using the generated embedding
+                        # for the job description and the resume
+                        resume.similarity = calculate_similarity(job_embedding, emb)
 
-                resume_features = [
-                    make_request(extract_info(
-                        resume_texts[index],
-                        text,
-                        job_text,
-                        RESUME_PROMPT,
-                        min_experience,
-                        required_skills,
-                        education_level,
+                    # returns sorted shortlisted resumes based on a threshold value compared
+                    # with the cosine similarity of each resume
+                    resumes = filter_by_threshold(resumes, 0.5450)
 
-                    ))
-                    for index, text in zip(indices, resume_texts)
-                ]
+                    # Extracting key features from the resumes
+                    resume_features = [
+                        make_request(openrouter_api_key, extract_info(
+                            resumes,
+                            resume.text,
+                            job_text,
+                            RESUME_PROMPT,
+                            min_experience,
+                            required_skills,
+                            education_level,
 
-                sl.write("### Extracted Resume Features:")
-                resumes = []
-                i = 1
-                for features, similarity in zip(resume_features, similarities):
-                    sl.write(f"Resume {i}:")
-                    sl.write(features)
-                    sl.write(f"Cosine Similarity: {similarity}")
-                    resume = f"Resume {i}: {features}\nCosine Similarity: {similarity}"
-                    resumes.append(resume)
-                    i = i + 1
+                        ))
+                        for resume in resumes
+                    ]
 
-                # # Create an array from resumes list
-                # array = np.array(resumes)
-                # # Sort using mergesort
-                # sorted_resumes = np.sort(array, kind='mergesort')
+                    # output the extracted features and cosine similarity for each resume
+                    sl.write("### Extracted Resume Features:")
+                    resumes_f = []
+                    i = 1
+                    for features, res in zip(resume_features, resumes):
+                        sl.write(f"Resume {i}:")
+                        sl.write(features)
+                        sl.write(f"Cosine Similarity: {res.similarity}")
+                        resume = f"Resume {i}: {features}\nCosine Similarity: {res.similarity}"
+                        resumes_f.append(resume)
+                        i = i + 1
 
-                short = make_request(shortlist(RESUME_PROMPT2, resumes))
-                analysis = make_request(final_analysis(RESUME_PROMPT3, job_text, short))
-                sl.write(short)
-                sl.write(analysis)
+                    # shortlist the resumes into top 5
+                    short = make_request(openrouter_api_key, shortlist(RESUME_PROMPT2, resumes_f))
+                    # Analyze top candidates' strengths and weaknesses, then conclude the best resume
+                    analysis = make_request(openrouter_api_key, final_analysis(RESUME_PROMPT3, job_text, short))
 
-            except Exception as e:
-                sl.error(f"An error occurred: {e}")
-        else:
-            sl.warning("Please upload a job description and at least one resume.")
+                    sl.write(short)  # output shortlist
+                    sl.write(analysis)  # output analysis
+
+                except Exception as e:
+                    sl.error(f"An error occurred: {e}")
+            else:
+                sl.warning("Please upload a job description and at least one resume.")
+    else:
+        sl.warning("Please enter an openrouter API key!")
 
 
 if __name__ == "__main__":
