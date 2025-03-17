@@ -3,17 +3,6 @@ import numpy as np
 
 
 def calculate_similarity(job_embedding, resume_embedding):
-    """
-    Calculates cosine similarity between job description and resume .
-
-    Args:
-        job_embedding (np.array): Embedding of the job description.
-        resume_embedding (np.array): Embedding of the resume.
-
-    Returns:
-        list: Similarity score between resume embedding and job description embedding.
-    """
-
     # Ensure inputs are NumPy arrays
     if isinstance(job_embedding, list):
         job_embedding = np.array(job_embedding)

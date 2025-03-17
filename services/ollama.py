@@ -1,5 +1,6 @@
+from dotenv import load_dotenv
+import os
 import requests
-from config import API_URL, OLLAMA_MODEL
 
 
 RESUME_PROMPT = """
@@ -11,7 +12,7 @@ RESUME_PROMPT = """
             - Soft Skills: [list of soft skills]
             - Experience: [list of experience requirements]
             - Qualifications: [list of qualifications]
-            - Score: [score value out of 10 for the resume compared to resume objects listed below
+            - Score: [integer value of 0 to 100 for the resume compared to resume objects listed below
              based on its level of match to the job description and criteria listed below]
             - Justification of given score: [bullet point list of reasons why the resume got 
             the previous score value]
@@ -56,11 +57,16 @@ RESUME_PROMPT3 = """
     {prev_data}
 """
 
+load_dotenv()
+API_URL = os.getenv("API_URL")
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL")
 
-def make_request(api_key, prompt):
+
+def make_request(prompt):
     try:
         # OpenRouter API configuration
-        headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
+        headers = {"Authorization": f"Bearer {OPENROUTER_API_KEY}", "Content-Type": "application/json"}
         payload = {
             "model": OLLAMA_MODEL,  # model name as shown in openrouter website
             "messages": [

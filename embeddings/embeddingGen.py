@@ -1,8 +1,11 @@
+from dotenv import load_dotenv
+import os
 from transformers import AutoTokenizer, AutoModel
 import torch
-from config import EMBED_MODEL
 
 torch.classes.__path__ = []  # to solve the error that happen between torch and streamlit
+load_dotenv()
+EMBED_MODEL = os.getenv("EMBED_MODEL")
 
 
 class EmbeddingGenerator:

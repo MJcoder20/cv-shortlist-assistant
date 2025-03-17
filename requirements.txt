@@ -13,5 +13,5 @@ scikit-learn~=1.6.1
 reportlab
 einops
 numpy~=2.2.3
-sklearn~=0.0
 openai~=1.66.3
+python-dotenv~=1.0.1
