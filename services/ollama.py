@@ -1,3 +1,5 @@
+import time
+
 from dotenv import load_dotenv
 import os
 import requests
@@ -94,7 +96,7 @@ def make_request(prompt):
         return f"{e}"
 
 
-def extract_info(resume_texts, text, job_text, prompt_template, min_experience, required_skills, education_level):
+def extract_info(resume_texts, text, job_text, prompt_template, min_experience=None, required_skills=None, education_level=None):
     # Inject user criteria into the prompt
     prompt = prompt_template.format(
         min_experience=min_experience,

@@ -15,3 +15,6 @@ einops
 numpy~=2.2.3
 openai~=1.66.3
 python-dotenv~=1.0.1
+testcontainers~=4.9.2
+sklearn~=0.0
+pytest~=8.3.5

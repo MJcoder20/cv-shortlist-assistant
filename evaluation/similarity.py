@@ -17,8 +17,6 @@ def calculate_similarity(job_embedding, resume_embedding):
 
     # Calculate cosine similarity
     similarity = cosine_similarity(job_embedding, resume_embedding)
-
-    # Flatten and return as a list
     return similarity[0][0]
 
 
